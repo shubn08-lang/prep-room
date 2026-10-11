@@ -14,7 +14,7 @@ type ResumeResult = {
 };
 
 const inputClass =
-  "w-full rounded-md border border-line bg-white px-3 py-2.5 text-sm text-ink " +
+  "w-full rounded-md border border-line bg-surface px-3 py-2.5 text-sm text-ink " +
   "focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent";
 
 const headingClass = "text-sm font-semibold uppercase tracking-wide text-muted";
@@ -82,7 +82,7 @@ export default function ResumeCheck() {
         )}
 
         <h3 className={"mt-10 " + headingClass}>Section scores</h3>
-        <div className="mt-3 divide-y divide-line rounded-lg border border-line bg-white">
+        <div className="mt-3 divide-y divide-line rounded-lg border border-line bg-surface">
           {result.sections.map((s) => (
             <div key={s.name} className="p-4">
               <div className="flex items-center justify-between">
@@ -117,7 +117,7 @@ export default function ResumeCheck() {
               {result.missingKeywords.map((k) => (
                 <span
                   key={k}
-                  className="rounded-full border border-line bg-white px-3 py-1 text-xs"
+                  className="rounded-full border border-line bg-surface px-3 py-1 text-xs"
                 >
                   {k}
                 </span>
@@ -134,7 +134,7 @@ export default function ResumeCheck() {
             </p>
             <div className="mt-3 space-y-4">
               {result.rewrites.map((r, i) => (
-                <div key={i} className="rounded-lg border border-line bg-white p-4 text-sm">
+                <div key={i} className="rounded-lg border border-line bg-surface p-4 text-sm">
                   <p className="text-xs font-medium uppercase tracking-wide text-muted">Before</p>
                   <p className="mt-1 leading-relaxed text-muted">{r.original}</p>
                   <p className="mt-3 text-xs font-medium uppercase tracking-wide text-accent">After</p>
@@ -148,7 +148,7 @@ export default function ResumeCheck() {
 
         <button
           onClick={() => setResult(null)}
-          className="mt-10 rounded-md bg-ink px-5 py-2.5 text-sm font-medium text-white hover:opacity-90"
+          className="mt-10 rounded-md bg-strong px-5 py-2.5 text-sm font-medium text-white hover:opacity-90"
         >
           Check another version
         </button>

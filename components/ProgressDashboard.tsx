@@ -25,7 +25,7 @@ function shortDate(iso: string) {
 
 function StatCard({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
-    <div className="rounded-lg border border-line bg-white p-4">
+    <div className="rounded-lg border border-line bg-surface p-4">
       <p className="text-xs font-medium uppercase tracking-wide text-muted">{label}</p>
       <p className="mt-2 text-3xl font-semibold text-ink">{value}</p>
       {hint && <p className="mt-1 text-xs text-muted">{hint}</p>}
@@ -156,7 +156,7 @@ export default function ProgressDashboard({ userId }: { userId: string }) {
       <h3 className="mt-10 text-sm font-semibold uppercase tracking-wide text-muted">
         Score over time
       </h3>
-      <div className="mt-3 rounded-lg border border-line bg-white p-4">
+      <div className="mt-3 rounded-lg border border-line bg-surface p-4">
         <ScoreChart points={points} />
       </div>
 
@@ -165,7 +165,7 @@ export default function ProgressDashboard({ userId }: { userId: string }) {
           <h3 className="mt-10 text-sm font-semibold uppercase tracking-wide text-muted">
             Average by skill
           </h3>
-          <div className="mt-3 space-y-4 rounded-lg border border-line bg-white p-4">
+          <div className="mt-3 space-y-4 rounded-lg border border-line bg-surface p-4">
             {skills.map((s) => (
               <div key={s.name}>
                 <div className="flex justify-between text-sm">
@@ -194,7 +194,7 @@ export default function ProgressDashboard({ userId }: { userId: string }) {
       <h3 className="mt-10 text-sm font-semibold uppercase tracking-wide text-muted">
         Recent attempts
       </h3>
-      <div className="mt-3 divide-y divide-line rounded-lg border border-line bg-white">
+      <div className="mt-3 divide-y divide-line rounded-lg border border-line bg-surface">
         {recent.map((r) => (
           <div key={r.id} className="flex items-center justify-between p-4 text-sm">
             <div>

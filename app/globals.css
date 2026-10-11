@@ -2,6 +2,85 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Light theme: navy, teal, beige, sky blue, white */
+:root {
+  --paper: 246 241 231;
+  --surface: 255 255 255;
+  --side: 220 238 248;
+  --line: 226 217 198;
+  --ink: 18 38 63;
+  --muted: 91 107 125;
+  --strong: 18 38 63;
+  --accent: 14 124 123;
+  --accent-dark: 10 99 98;
+  color-scheme: light;
+}
+
+/* Dark theme: noir, midnight blue, ocean, pearl */
+:root[data-theme="dark"] {
+  --paper: 7 17 28;
+  --surface: 13 28 43;
+  --side: 4 8 13;
+  --line: 28 50 71;
+  --ink: 234 241 247;
+  --muted: 143 166 184;
+  --strong: 21 50 74;
+  --accent: 20 160 170;
+  --accent-dark: 16 138 148;
+  color-scheme: dark;
+}
+
 body {
-  @apply bg-paper text-ink antialiased;
+  background: rgb(var(--paper));
+  color: rgb(var(--ink));
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+::placeholder {
+  color: rgb(var(--muted) / 0.7);
+}
+
+/* Keep red and amber messages readable on dark backgrounds */
+:root[data-theme="dark"] .text-red-700 {
+  color: #f87171;
+}
+:root[data-theme="dark"] .text-amber-700 {
+  color: #fbbf24;
+}
+
+@font-face {
+  font-family: "Laluna";
+  src: url("/fonts/laluna.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Kodakku";
+  src: url("/fonts/kodakku.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Threats Emerge";
+  src: url("/fonts/threats-emerge.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+.font-brand {
+  font-family: "Laluna", Georgia, serif;
+}
+
+.font-greeting {
+  font-family: "Kodakku", "Arial Black", sans-serif;
+}
+
+.font-sidebar {
+  font-family: "Threats Emerge", "Arial", sans-serif;
 }

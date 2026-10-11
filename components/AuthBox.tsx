@@ -4,7 +4,7 @@ import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 const inputClass =
-  "w-full rounded-md border border-line bg-white px-3 py-2.5 text-sm " +
+  "w-full rounded-md border border-line bg-surface px-3 py-2.5 text-sm " +
   "focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent";
 
 export default function AuthBox() {

@@ -23,7 +23,7 @@ function Card({
   color?: string;
 }) {
   return (
-    <div className="rounded-lg border border-line bg-white p-4">
+    <div className="rounded-lg border border-line bg-surface p-4">
       <p className="text-xs font-medium uppercase tracking-wide text-muted">{label}</p>
       <p className={"mt-2 text-xl font-semibold " + (color ?? "")}>{value}</p>
     </div>
@@ -58,7 +58,7 @@ export default function ListeningView({ report }: { report: ListeningReport }) {
       <h4 className="mt-6 text-xs font-semibold uppercase tracking-wide text-muted">
         Teammate by teammate
       </h4>
-      <div className="mt-3 divide-y divide-line rounded-lg border border-line bg-white">
+      <div className="mt-3 divide-y divide-line rounded-lg border border-line bg-surface">
         {report.segments.map((s) => (
           <div
             key={s.speaker}

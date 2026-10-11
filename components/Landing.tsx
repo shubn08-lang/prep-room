@@ -122,7 +122,7 @@ export default function Landing({ onStart }: Props) {
           {features.map((f) => (
             <div
               key={f.title}
-              className="rounded-lg border border-line bg-white p-4"
+              className="rounded-lg border border-line bg-surface p-4"
             >
               <p
                 className={

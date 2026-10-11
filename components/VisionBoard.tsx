@@ -16,7 +16,7 @@ type Item = {
 const MAX_GOALS = 8;
 
 const inputClass =
-  "w-full rounded-md border border-line bg-white px-3 py-2.5 text-sm text-ink " +
+  "w-full rounded-md border border-line bg-surface px-3 py-2.5 text-sm text-ink " +
   "focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent";
 
 function errorMessage(e: unknown) {
@@ -234,7 +234,7 @@ export default function VisionBoard({ userId }: { userId: string }) {
 
       {error && <p className="mt-4 text-sm text-red-700">{error}</p>}
 
-      <div className="mt-8 rounded-lg border border-line bg-white p-5">
+      <div className="mt-8 rounded-lg border border-line bg-surface p-5">
         <h3 className="text-sm font-semibold uppercase tracking-wide text-muted">
           Add a goal
         </h3>
@@ -311,7 +311,7 @@ export default function VisionBoard({ userId }: { userId: string }) {
           {items.map((item) => (
             <div
               key={item.id}
-              className="overflow-hidden rounded-lg border border-line bg-white"
+              className="overflow-hidden rounded-lg border border-line bg-surface"
             >
               {item.image ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -361,7 +361,7 @@ export default function VisionBoard({ userId }: { userId: string }) {
       {affirmations.length > 0 && (
         <ul className="mt-5 space-y-2 text-sm leading-relaxed">
           {affirmations.map((a, i) => (
-            <li key={i} className="rounded-md border border-line bg-white px-4 py-3">
+            <li key={i} className="rounded-md border border-line bg-surface px-4 py-3">
               {a}
             </li>
           ))}
@@ -371,7 +371,7 @@ export default function VisionBoard({ userId }: { userId: string }) {
       <button
         onClick={generate}
         disabled={generating || items.length === 0}
-        className="mt-5 rounded-md bg-ink px-5 py-2.5 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
+        className="mt-5 rounded-md bg-strong px-5 py-2.5 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
       >
         {generating
           ? "Writing your affirmations..."

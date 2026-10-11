@@ -27,7 +27,7 @@ function ListBlock({ title, items }: { title: string; items: string[] }) {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-line bg-white p-4">
+    <div className="rounded-lg border border-line bg-surface p-4">
       <p className="text-xs font-medium uppercase tracking-wide text-muted">{label}</p>
       <p className="mt-2 text-2xl font-semibold">{value}</p>
     </div>
@@ -44,7 +44,7 @@ function RatingCard({ label, rating }: { label: string; rating: Rating | null })
           ? "text-red-700"
           : "text-muted";
   return (
-    <div className="rounded-lg border border-line bg-white p-4">
+    <div className="rounded-lg border border-line bg-surface p-4">
       <p className="text-xs font-medium uppercase tracking-wide text-muted">{label}</p>
       <p className={"mt-2 text-xl font-semibold " + color}>
         {rating ?? "Not enough data"}
@@ -75,7 +75,7 @@ export default function DebriefView({ debrief, onRestart, restartLabel }: Props)
       <h3 className="mt-10 text-sm font-semibold uppercase tracking-wide text-muted">
         Rubric
       </h3>
-      <div className="mt-3 divide-y divide-line rounded-lg border border-line bg-white">
+      <div className="mt-3 divide-y divide-line rounded-lg border border-line bg-surface">
         {debrief.rubric.map((r) => (
           <div key={r.skill} className="p-4">
             <div className="flex items-center justify-between">
@@ -180,7 +180,7 @@ export default function DebriefView({ debrief, onRestart, restartLabel }: Props)
 
       <button
         onClick={onRestart}
-        className="mt-10 rounded-md bg-ink px-5 py-2.5 text-sm font-medium text-white hover:opacity-90"
+        className="mt-10 rounded-md bg-strong px-5 py-2.5 text-sm font-medium text-white hover:opacity-90"
       >
         {restartLabel ?? "Start another interview"}
       </button>

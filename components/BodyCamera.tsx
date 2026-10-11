@@ -54,7 +54,7 @@ export default function BodyCamera({ registerSummary, registerControls }: Props)
   const active = status === "on" || status === "loading";
 
   return (
-    <div className="mt-6 rounded-lg border border-line bg-white p-4">
+    <div className="mt-6 rounded-lg border border-line bg-surface p-4">
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-sm font-medium">Body language practice</p>
@@ -79,7 +79,7 @@ export default function BodyCamera({ registerSummary, registerControls }: Props)
           ref={videoRef}
           muted
           playsInline
-          className="h-32 w-44 rounded-md bg-ink object-cover"
+          className="h-32 w-44 rounded-md bg-strong object-cover"
           style={{ transform: "scaleX(-1)" }}
         />
         <div className="min-w-[220px] flex-1">

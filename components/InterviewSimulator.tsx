@@ -7,24 +7,26 @@ import { STYLES } from "@/lib/prompts";
 import { TOTAL_QUESTIONS } from "@/lib/config";
 import { useSpeechInput } from "@/lib/useSpeechInput";
 import { buildStat, summarizeVoice } from "@/lib/voice";
+import { COMPANIES, LEVELS, companyFocus } from "@/lib/companies";
+import type { Level } from "@/lib/companies";
 import type {
+  BodyReport,
   Debrief,
   InterviewerStyle,
   Message,
   Mode,
   SetupConfig,
   VoiceStat,
-  BodyReport,
 } from "@/lib/types";
-import DebriefView from "./DebriefView";
 import BodyCamera from "./BodyCamera";
+import DebriefView from "./DebriefView";
 
 type Company = { id: string; name: string; trend_notes: string | null };
 type ChatItem = Message & { coachTip?: string };
 type Stage = "setup" | "interview" | "debrief";
 
 const inputClass =
-  "w-full rounded-md border border-line bg-white px-3 py-2.5 text-sm text-ink " +
+  "w-full rounded-md border border-line bg-surface px-3 py-2.5 text-sm text-ink " +
   "focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent";
 
 const MODES: { value: Mode; title: string; text: string }[] = [
@@ -45,8 +47,8 @@ function cardClass(selected: boolean) {
   return (
     base +
     (selected
-      ? "border-accent bg-white ring-1 ring-accent"
-      : "border-line bg-white hover:border-muted")
+      ? "border-accent bg-surface ring-1 ring-accent"
+      : "border-line bg-surface hover:border-muted")
   );
 }
 
@@ -85,6 +87,7 @@ export default function InterviewSimulator({ userId }: { userId: string }) {
   const [debrief, setDebrief] = useState<Debrief | null>(null);
   const [speakAloud, setSpeakAloud] = useState(false);
   const [lastStat, setLastStat] = useState<VoiceStat | null>(null);
+  const [level, setLevel] = useState<Level>("junior");
 
   const endRef = useRef<HTMLDivElement>(null);
   const usedVoice = useRef(false);
@@ -112,8 +115,18 @@ export default function InterviewSimulator({ userId }: { userId: string }) {
     return () => stopSpeaking();
   }, []);
 
-  const companyNotes =
+  const savedNotes =
     companies.find((c) => c.name === config.company)?.trend_notes ?? "";
+  const baseNotes = savedNotes || companyFocus(config.company);
+  const hasNotes = Boolean(baseNotes);
+  const levelInfo = LEVELS.find((l) => l.value === level) ?? LEVELS[1];
+  const companyNotes = [
+    baseNotes,
+    `Candidate level: ${levelInfo.title}. ${levelInfo.guide}`,
+  ]
+    .filter(Boolean)
+    .join("\n\n");
+  const roleForAi = `${config.role.trim()} (${levelInfo.title} level)`;
   const answered = chat.filter((m) => m.role === "user").length;
   const allAnswered = answered >= TOTAL_QUESTIONS;
 
@@ -139,7 +152,7 @@ export default function InterviewSimulator({ userId }: { userId: string }) {
     const res = await fetch("/api/groq-interview", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
+      body: JSON.stringify({ ...body, config: { ...config, role: roleForAi } }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error ?? "Request failed.");
@@ -162,7 +175,6 @@ export default function InterviewSimulator({ userId }: { userId: string }) {
     try {
       const data = await callApi({
         action: "turn",
-        config,
         companyNotes,
         messages: [],
       });
@@ -176,7 +188,7 @@ export default function InterviewSimulator({ userId }: { userId: string }) {
     }
   }
 
-    async function finishInterview(finalChat: ChatItem[]) {
+  async function finishInterview(finalChat: ChatItem[]) {
     const body = bodySummaryRef.current();
     speech.stop();
     stopSpeaking();
@@ -189,22 +201,24 @@ export default function InterviewSimulator({ userId }: { userId: string }) {
       }));
       const scored: Debrief = await callApi({
         action: "debrief",
-        config,
         messages: transcript,
       });
       const voice = summarizeVoice(voiceStatsRef.current);
 
-      const result: Debrief = voice ? { ...scored, voice } : scored;
+      const result: Debrief = { ...scored };
+      if (voice) result.voice = voice;
+      if (body) result.body = body;
 
       setDebrief(result);
       setStage("debrief");
 
+      // Save the whole session for the Progress tab
       const { error: saveError } = await supabase.from("sessions").insert({
         user_id: userId,
         mode: config.mode,
         scenario_type: "interview",
         company: config.company,
-        role: config.role,
+        role: roleForAi,
         interviewer_style: config.style,
         transcript,
         debrief: result,
@@ -214,6 +228,33 @@ export default function InterviewSimulator({ userId }: { userId: string }) {
         setError(
           "Your debrief is ready, but saving it failed: " + saveError.message
         );
+      }
+
+      // Save each question and answer for the History tab
+      const pairs = transcript.flatMap((m, i) =>
+        m.role === "assistant" && transcript[i + 1]?.role === "user"
+          ? [
+              {
+                user_id: userId,
+                question: m.content,
+                answer: transcript[i + 1].content,
+                company: config.company,
+                role: roleForAi,
+                mode: config.mode,
+              },
+            ]
+          : []
+      );
+      if (pairs.length > 0) {
+        const { error: pairError } = await supabase
+          .from("saved_questions")
+          .insert(pairs);
+        if (pairError) {
+          console.error("saving questions failed:", pairError);
+          setError(
+            "Your questions could not be saved to History: " + pairError.message
+          );
+        }
       }
     } catch (e) {
       setError(errorMessage(e));
@@ -242,7 +283,6 @@ export default function InterviewSimulator({ userId }: { userId: string }) {
     try {
       const data = await callApi({
         action: "turn",
-        config,
         companyNotes,
         messages: next.map(({ role, content }) => ({ role, content })),
       });
@@ -335,12 +375,55 @@ export default function InterviewSimulator({ userId }: { userId: string }) {
                 <option key={c.id} value={c.name} />
               ))}
             </datalist>
-            {companyNotes && (
+            {hasNotes && (
               <p className="mt-2 text-xs text-muted">
                 Saved company notes found. Questions will follow them.
               </p>
             )}
           </Field>
+
+          <div>
+            <span className="block text-sm font-medium">Popular companies</span>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {COMPANIES.map((c) => (
+                <button
+                  key={c.name}
+                  type="button"
+                  onClick={() => setConfig({ ...config, company: c.name })}
+                  className={
+                    "rounded-full border px-3 py-1 text-xs transition-colors " +
+                    (config.company === c.name
+                      ? "border-accent bg-accent text-white"
+                      : "border-line bg-surface text-muted hover:text-ink")
+                  }
+                >
+                  {c.name}
+                </button>
+              ))}
+            </div>
+            <p className="mt-2 text-xs text-muted">
+              Or type any company in the box above.
+            </p>
+          </div>
+
+          <fieldset>
+            <legend className="text-sm font-medium">Your level</legend>
+            <div className="mt-2 grid gap-3 sm:grid-cols-2">
+              {LEVELS.map((l) => (
+                <label key={l.value} className={cardClass(level === l.value)}>
+                  <input
+                    type="radio"
+                    name="level"
+                    className="sr-only"
+                    checked={level === l.value}
+                    onChange={() => setLevel(l.value)}
+                  />
+                  <span className="block text-sm font-medium">{l.title}</span>
+                  <span className="mt-1 block text-xs text-muted">{l.text}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
 
           <fieldset>
             <legend className="text-sm font-medium">Interviewer behaviour</legend>
@@ -412,7 +495,7 @@ export default function InterviewSimulator({ userId }: { userId: string }) {
           {config.role} at {config.company}
         </h2>
         <p className="text-sm text-muted">
-          {STYLES[config.style].label} |{" "}
+          {STYLES[config.style].label} | {levelInfo.title} |{" "}
           {config.mode === "practice" ? "Practice mode" : "Test mode"}
         </p>
         <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-line">
@@ -426,11 +509,12 @@ export default function InterviewSimulator({ userId }: { userId: string }) {
         </p>
       </header>
 
-             <BodyCamera
+      <BodyCamera
         registerSummary={(fn) => {
           bodySummaryRef.current = fn;
         }}
       />
+
       <div className="mt-6 space-y-5">
         {chat.map((m, i) =>
           m.role === "assistant" ? (
@@ -438,7 +522,7 @@ export default function InterviewSimulator({ userId }: { userId: string }) {
               <p className="mb-1 text-xs font-medium uppercase tracking-wide text-muted">
                 Interviewer
               </p>
-              <div className="whitespace-pre-wrap rounded-lg border border-line bg-white px-4 py-3 text-sm leading-relaxed">
+              <div className="whitespace-pre-wrap rounded-lg border border-line bg-surface px-4 py-3 text-sm leading-relaxed">
                 {m.content}
               </div>
               {m.coachTip && (
@@ -453,7 +537,7 @@ export default function InterviewSimulator({ userId }: { userId: string }) {
               <p className="mb-1 text-right text-xs font-medium uppercase tracking-wide text-muted">
                 You
               </p>
-              <div className="whitespace-pre-wrap rounded-lg bg-ink px-4 py-3 text-sm leading-relaxed text-white">
+              <div className="whitespace-pre-wrap rounded-lg bg-strong px-4 py-3 text-sm leading-relaxed text-white">
                 {m.content}
               </div>
             </div>
@@ -478,7 +562,7 @@ export default function InterviewSimulator({ userId }: { userId: string }) {
               type="button"
               onClick={toggleMic}
               disabled={busy || allAnswered}
-              className="flex items-center gap-2 rounded-md border border-line bg-white px-3 py-1.5 text-xs font-medium hover:border-muted disabled:opacity-50"
+              className="flex items-center gap-2 rounded-md border border-line bg-surface px-3 py-1.5 text-xs font-medium hover:border-muted disabled:opacity-50"
             >
               <span
                 className={
